@@ -1,37 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Excel Upload</title>
+  <title>Store User Data</title>
+  <style>
+    /* Add some basic styles for the form */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+      width: 300px;
+      padding: 5px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h1>Excel Upload</h1>
-  <input type="file" id="fileInput" accept=".xlsx">
-  <button id="uploadButton">Upload</button>
-  
+  <h2>Store User Data</h2>
+  <form id="userForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+    <br>
+    <label for="age">Age:</label>
+    <input type="text" id="age" required>
+    <br>
+    <label for="phone">Phone Number:</label>
+    <input type="text" id="phone" required>
+    <br>
+    <label for="email">Email:</label>
+    <input type="text" id="email" required>
+    <br>
+    <label for="city">City:</label>
+    <input type="text" id="city" required>
+    <br>
+    <button type="submit">Store Data</button>
+  </form>
+
   <script>
-    document.getElementById('uploadButton').addEventListener('click', () => {
-      const fileInput = document.getElementById('fileInput');
-      const file = fileInput.files[0];
-      
-      if (!file) {
-        alert('Please select a file.');
-        return;
-      }
-      
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      fetch('http://localhost:3000/upload', {
+    // Handle form submission
+    document.getElementById('userForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Get form values
+      const name = document.getElementById('name').value;
+      const age = document.getElementById('age').value;
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('email').value;
+      const city = document.getElementById('city').value;
+
+      // Create user object
+      const user = {
+        name: name,
+        age: age,
+        phone: phone,
+        email: email,
+        city: city
+      };
+
+      // Send user data to the backend for storage
+      fetch('/storeUserData', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(user)
       })
       .then(response => response.json())
       .then(data => {
         alert(data.message);
+        document.getElementById('userForm').reset();
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred. Please try again.');
       });
     });
   </script>
