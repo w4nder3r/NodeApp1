@@ -1,35 +1,37 @@
-const Redis = require('ioredis');
-const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
+document.getElementById('dataForm').addEventListener('submit', postData);
 
-// Configure Redis connection
-const redis = new Redis();
+function postData(event) {
+  event.preventDefault(); // Prevent the form from submitting and reloading the page
 
-// Parse JSON bodies
-app.use(bodyParser.json());
+  const name = document.getElementById('name').value;
+  const age = document.getElementById('age').value;
+  const occupation = document.getElementById('occupation').value;
 
-// Handle POST request to store user data
-app.post('/storeUserData', async (req, res) => {
-  try {
-    const { name, age, phone, email, city } = req.body;
+  // Create a new XMLHttpRequest object
+  const xhr = new XMLHttpRequest();
+  
+  // Configure the request
+  xhr.open('POST', '/postdata', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  
+  // Define the data to be sent to the server
+  const data = {
+    name: name,
+    age: age,
+    occupation: occupation
+  };
 
-    // Store user data in Redis
-    await redis.hmset('user', ['name', name, 'age', age, 'phone', phone, 'email', email, 'city', city]);
+  // Send the data to the server
+  xhr.send(JSON.stringify(data));
 
-    res.json({ message: 'User data stored in Redis successfully!' });
-  } catch (error) {
-    console.error('Error storing user data in Redis:', error);
-    res.status(500).json({ message: 'An error occurred while storing user data.' });
-  }
-});
-
-// Serve the frontend HTML file
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
-
-// Start the server
-app.listen(3000, () => {
-  console.log('Server started on port 3000');
-});
+  // Handle the response from the server
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        alert('Data posted successfully!');
+      } else {
+        alert('Failed to post data to Redis.');
+      }
+    }
+  };
+}
