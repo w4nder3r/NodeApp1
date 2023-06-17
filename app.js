@@ -1,37 +1,30 @@
-document.getElementById('dataForm').addEventListener('submit', postData);
+const redis = require('redis');
 
-function postData(event) {
-  event.preventDefault(); // Prevent the form from submitting and reloading the page
+// Create a Redis client
+const client = redis.createClient();
 
-  const name = document.getElementById('name').value;
-  const age = document.getElementById('age').value;
-  const occupation = document.getElementById('occupation').value;
+// Handle Redis connection events
+client.on('connect', () => {
+  console.log('Connected to Redis');
+});
 
-  // Create a new XMLHttpRequest object
-  const xhr = new XMLHttpRequest();
-  
-  // Configure the request
-  xhr.open('POST', '/postdata', true);
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  
-  // Define the data to be sent to the server
-  const data = {
-    name: name,
-    age: age,
-    occupation: occupation
-  };
+client.on('error', (error) => {
+  console.error('Redis Error:', error);
+});
 
-  // Send the data to the server
-  xhr.send(JSON.stringify(data));
+// Define the key-value data to be stored in Redis
+const data = {
+  name: 'John Doe',
+  age: 30,
+  occupation: 'Developer',
+};
 
-  // Handle the response from the server
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === XMLHttpRequest.DONE) {
-      if (xhr.status === 200) {
-        alert('Data posted successfully!');
-      } else {
-        alert('Failed to post data to Redis.');
-      }
-    }
-  };
-}
+// Store data in Redis
+client.hmset('user', data, (error, result) => {
+  if (error) {
+    console.error('Failed to store data in Redis:', error);
+  } else {
+    console.log('Data stored in Redis:', result);
+    client.quit(); // Close the Redis connection
+  }
+});
